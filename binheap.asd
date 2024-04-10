@@ -9,6 +9,6 @@
   :description "Binary heap"
   :long-description ""
   :components
-  ((:file "packages")
-   (:file "binheap" :depends-on ("packages")))
+  ((:file "package")
+   (:file "binheap" :depends-on ("package")))
   :depends-on ())
