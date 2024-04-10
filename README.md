@@ -38,10 +38,10 @@ To create a new binary heap, use `make-binheap`. For example:
 
 Because the binary heap uses an adjustable array, if you have an
 idea how many items you might need to store, you can specify an
-initial capacity:
+initial size:
 
 ```lisp
-(setf myheap (make-binheap :initial-capacity 1000))
+(setf myheap (make-binheap :initial-size 1000))
 ```
 
 You can also use the `:comp` keyword to specify a comparison function.
