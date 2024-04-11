@@ -54,27 +54,21 @@
 	 (let ((left-val (aref tree left))
 	       (right-val (aref tree right))
 	       (parent-val (aref tree parent)))
-	   (cond
-	     ;;; If left is smaller than both its parent and the right,
-	     ;;; swap it with the parent and rebalance downward
-	     ((and (funcall comp left-val parent-val)
-		   (funcall comp left-val right-val))
-	      (binheap-swap binheap left parent)
-	      (binheap-rebalance-down binheap left))
-	     ;;; If the right is smaller than both its parent and the left,
-	     ;;; swap it with the parent and rebalance downward
-	     ((and (funcall comp right-val parent-val)
-		   (funcall comp right-val left-val))
-	      (binheap-swap binheap right parent)
-	      (binheap-rebalance-down binheap right))
-	     ;;; If left is smaller than the parent, swap it with the parent and rebalance
-	     ((funcall comp left-val parent-val)
-	      (binheap-swap binheap left parent)
-	      (binheap-rebalance-down binheap left))
-	     ;;; If the right is smaller than the parent, swap it with the parent and rebalance
-	     ((funcall comp right-val parent-val)
-	      (binheap-swap binheap right parent)
-	      (binheap-rebalance-down binheap right)))))
+	   ;;; If the left is less than the parent, we need to swap
+	   (if (funcall comp left-val parent-val)
+	       ;;; If the right is less than the left, swap it with the parent
+	       (if (funcall comp right-val left-val)
+		   (progn
+		     (binheap-swap binheap right parent)
+		     (binheap-rebalance-down binheap right))
+		   ;;; Otherwise swap the left with the parent
+		   (progn
+		     (binheap-swap binheap left parent)
+		     (binheap-rebalance-down binheap left)))
+	       ;;; If the left wasn't less than the parent, see if the right one is
+	       (when (funcall comp right-val parent-val)
+		 (binheap-swap binheap right parent)
+		 (binheap-rebalance-down binheap left)))))
 	((< left (length tree))
 	 ;;; If only the left exists, if it is less than the parent, swap and rebalance
 	 (let ((left-val (aref tree left))
