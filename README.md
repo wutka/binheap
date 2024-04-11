@@ -116,3 +116,120 @@ NIL
 T
 *
 ```
+
+## Updating values
+
+Sometimes you need to change the value of an item in the heap, for example, if
+you are using the heap to store nodes for a shortest-path algorithm, you might
+need to update the weight of a node because it is in the heap but you found
+a shorter path to it.
+
+There are different ways to approach the problem, such as allowing for a key
+lookup in the heap, but instead, this library allows you to specify a function
+that saves the current index of an item in the key. When the item is inserted
+or moved, the key update function is invoked with the item and its new index.
+If you change the value of an item, you can call binheap-rebalance on the heap
+and give the index value of the item.
+
+For example, suppose we define a struct that we might want to change:
+```lisp
+(defstruct heapable-item
+  (name "")
+  (key -1))
+```
+
+The `key` field will contain the item's current index in the heap, and the
+`name` field is the field that determines the sort order. We can define a
+comparison function:
+```lisp
+(defun compare-heapables (a b)
+  (string< (heapable-item-name a) (heapable-item-name b)))
+```
+
+And then we also define a function to set the key:
+```lisp
+(defun update-heapable (a n)
+  (setf (heapable-item-key a) n))
+```
+
+Now, lets create a heapable-item struct named `quux`:
+```lisp
+CL-USER> (setf quux (make-heapable-item :name "quux"))
+#S(HEAPABLE-ITEM :NAME "quux" :KEY -1)
+CL-USER> 
+```
+
+Next, we'll create a heap, add a few other values to it and
+then add `quux`:
+```lisp
+CL-USER> (setf heap (make-binheap :comp #'compare-heapables :key-update #'update-heapable))
+#S(COM.WUTKA.BINHEAP::BH
+   :TREE #()
+   :COMP #<FUNCTION COMPARE-HEAPABLES>
+   :KEY-UPDATE #<FUNCTION UPDATE-HEAPABLE>)
+CL-USER> (binheap-push heap (make-heapable-item :name "foo"))
+NIL
+CL-USER> (binheap-push heap (make-heapable-item :name "bar"))
+NIL
+CL-USER> (binheap-push heap (make-heapable-item :name "baz"))
+NIL
+CL-USER> (binheap-push heap quux)
+NIL
+CL-USER> heap
+#S(COM.WUTKA.BINHEAP::BH
+   :TREE #(#S(HEAPABLE-ITEM :NAME "bar" :KEY 0)
+           #S(HEAPABLE-ITEM :NAME "foo" :KEY 1)
+           #S(HEAPABLE-ITEM :NAME "baz" :KEY 2)
+           #S(HEAPABLE-ITEM :NAME "quux" :KEY 3))
+   :COMP #<FUNCTION COMPARE-HEAPABLES>
+   :KEY-UPDATE #<FUNCTION UPDATE-HEAPABLE>)
+CL-USER> 
+```
+
+At this point, the "bar" item is at the root of the tree, with left children "foo" and "baz",
+and then "quux" would be a left child of foo. Now, we want to update the name in `quuz` so that
+it would need to become the root, so we set the value, and then tell the heap to update at
+the position given by the `key` value in `quux`:
+```lisp
+CL-USER> (setf (heapable-item-name quux) "argle")
+"argle"
+CL-USER> heap
+#S(COM.WUTKA.BINHEAP::BH
+   :TREE #(#S(HEAPABLE-ITEM :NAME "bar" :KEY 0)
+           #S(HEAPABLE-ITEM :NAME "foo" :KEY 1)
+           #S(HEAPABLE-ITEM :NAME "baz" :KEY 2)
+           #S(HEAPABLE-ITEM :NAME "argle" :KEY 3))
+   :COMP #<FUNCTION COMPARE-HEAPABLES>
+   :KEY-UPDATE #<FUNCTION UPDATE-HEAPABLE>)
+CL-USER> (binheap-rebalance-at heap (heapable-item-key quux))
+NIL
+CL-USER> heap
+#S(COM.WUTKA.BINHEAP::BH
+   :TREE #(#S(HEAPABLE-ITEM :NAME "argle" :KEY 0)
+           #S(HEAPABLE-ITEM :NAME "bar" :KEY 1)
+           #S(HEAPABLE-ITEM :NAME "baz" :KEY 2)
+           #S(HEAPABLE-ITEM :NAME "foo" :KEY 3))
+   :COMP #<FUNCTION COMPARE-HEAPABLES>
+   :KEY-UPDATE #<FUNCTION UPDATE-HEAPABLE>)
+CL-USER> quux
+#S(HEAPABLE-ITEM :NAME "argle" :KEY 0)
+CL-USER> 
+```
+
+The binary heap has been rebalances to that the `quux` item, whose name is now
+"argle" has moved to the root and its key value has been changed, as have some
+of the other heap keys. When we pop the values off the heap they are in the correct
+sorted order:
+```lisp
+CL-USER> (binheap-pop heap)
+#S(HEAPABLE-ITEM :NAME "argle" :KEY 0)
+CL-USER> (binheap-pop heap)
+#S(HEAPABLE-ITEM :NAME "bar" :KEY 0)
+CL-USER> (binheap-pop heap)
+#S(HEAPABLE-ITEM :NAME "baz" :KEY 2)
+CL-USER> (binheap-pop heap)
+#S(HEAPABLE-ITEM :NAME "foo" :KEY 1)
+CL-USER> (binheap-pop heap)
+NIL
+CL-USER> 
+```

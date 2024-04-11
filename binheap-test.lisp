@@ -10,3 +10,13 @@
   (let ((binheap (make-binheap)))
     (dolist (x l) (binheap-push binheap x))
     binheap))
+
+(defstruct heapable-item
+  (name "")
+  (key -1))
+
+(defun compare-heapables (a b)
+  (string< (heapable-item-name a) (heapable-item-name b)))
+
+(defun update-heapable (a n)
+  (setf (heapable-item-key a) n))
