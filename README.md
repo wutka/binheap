@@ -126,7 +126,7 @@ a shorter path to it.
 
 There are different ways to approach the problem, such as allowing for a key
 lookup in the heap, but instead, this library allows you to specify a function
-that saves the current index of an item in the key. When the item is inserted
+that saves the current index of an item. When the item is inserted
 or moved, the key update function is invoked with the item and its new index.
 If you change the value of an item, you can call binheap-rebalance on the heap
 and give the index value of the item.
