@@ -187,7 +187,7 @@ CL-USER>
 ```
 
 At this point, the "bar" item is at the root of the tree, with left children "foo" and "baz",
-and then "quux" would be a left child of foo. Now, we want to update the name in `quuz` so that
+and then "quux" would be a left child of foo. Now, we want to update the name in `quux` so that
 it would need to become the root, so we set the value, and then tell the heap to update at
 the position given by the `key` value in `quux`:
 ```lisp
@@ -216,7 +216,7 @@ CL-USER> quux
 CL-USER> 
 ```
 
-The binary heap has been rebalances to that the `quux` item, whose name is now
+The binary heap has been rebalanced to that the `quux` item, whose name is now
 "argle" has moved to the root and its key value has been changed, as have some
 of the other heap keys. When we pop the values off the heap they are in the correct
 sorted order:
