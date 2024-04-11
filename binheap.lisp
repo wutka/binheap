@@ -1,7 +1,7 @@
 (in-package :com.wutka.binheap)
 
 (defstruct bh
-  (tree (make-array 50 :fill-pointer 0)) (comp #'<))
+  (tree (make-array 50 :fill-pointer 0 :adjustable t)) (comp #'<))
 
 (defmacro with-binheap (binheap &body body)
   `(with-accessors ((tree bh-tree)
@@ -11,7 +11,7 @@
 
 (defun make-binheap (&key (comp #'<) (initial-size 50) (initial-contents nil))
   (if (null initial-contents)
-      (make-bh :tree (make-array initial-size :fill-pointer 0) :comp comp)
+      (make-bh :tree (make-array initial-size :fill-pointer 0 :adjustable t) :comp comp)
       (let* ((initial-len (length initial-contents))
 	     (tree-array (make-array initial-len :fill-pointer initial-len
 						 :initial-contents initial-contents :adjustable t)))
@@ -35,7 +35,7 @@
 (defun binheap-push (binheap x)
   (with-binheap binheap
     ;;; Add the new item to the end of the vector
-    (vector-push x tree)
+    (vector-push-extend x tree)
     ;;; Rebalance the tree from the bottom up
     (binheap-rebalance-up binheap (- (length tree) 1))))
 
