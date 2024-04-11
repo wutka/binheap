@@ -68,7 +68,7 @@
 	       ;;; If the left wasn't less than the parent, see if the right one is
 	       (when (funcall comp right-val parent-val)
 		 (binheap-swap binheap right parent)
-		 (binheap-rebalance-down binheap left)))))
+		 (binheap-rebalance-down binheap right)))))
 	((< left (length tree))
 	 ;;; If only the left exists, if it is less than the parent, swap and rebalance
 	 (let ((left-val (aref tree left))
