@@ -58,39 +58,39 @@
     (if (bh-key-update binheap)
 	(let ((update (bh-key-update binheap)))
 	  (funcall update (aref (bh-tree binheap) a) a)
-	  (funcall update (aref (bh-tree binheap) b) b)))
+	  (funcall update (aref (bh-tree binheap) b) b)))))
 
-    (defun binheap-rebalance-down (binheap parent)
-      (with-binheap
-	  binheap
-	(let* ((right (right-loc parent))
-	       (left (left-loc parent)))
-	  (cond
-	    ((< right (length tree))
-	     (let ((left-val (aref tree left))
-		   (right-val (aref tree right))
-		   (parent-val (aref tree parent)))
+(defun binheap-rebalance-down (binheap parent)
+  (with-binheap
+    binheap
+    (let* ((right (right-loc parent))
+	   (left (left-loc parent)))
+      (cond
+	((< right (length tree))
+	 (let ((left-val (aref tree left))
+	       (right-val (aref tree right))
+	       (parent-val (aref tree parent)))
 	   ;;; If the left is less than the parent, we need to swap
-	       (if (funcall comp left-val parent-val)
+	   (if (funcall comp left-val parent-val)
 	       ;;; If the right is less than the left, swap it with the parent
-		   (if (funcall comp right-val left-val)
-		       (progn
-			 (binheap-swap binheap right parent)
-			 (binheap-rebalance-down binheap right))
-		   ;;; Otherwise swap the left with the parent
-		       (progn
-			 (binheap-swap binheap left parent)
-			 (binheap-rebalance-down binheap left)))
-	       ;;; If the left wasn't less than the parent, see if the right one is
-		   (when (funcall comp right-val parent-val)
+	       (if (funcall comp right-val left-val)
+		   (progn
 		     (binheap-swap binheap right parent)
-		     (binheap-rebalance-down binheap right)))))
-	    ((< left (length tree))
+		     (binheap-rebalance-down binheap right))
+		   ;;; Otherwise swap the left with the parent
+		   (progn
+		     (binheap-swap binheap left parent)
+		     (binheap-rebalance-down binheap left)))
+	       ;;; If the left wasn't less than the parent, see if the right one is
+	       (when (funcall comp right-val parent-val)
+		 (binheap-swap binheap right parent)
+		 (binheap-rebalance-down binheap right)))))
+	((< left (length tree))
 	 ;;; If only the left exists, if it is less than the parent, swap and rebalance
-	     (let ((left-val (aref tree left))
-		   (parent-val (aref tree parent)))
-	       (when (funcall comp left-val parent-val)
-		 (binheap-swap binheap left parent))))))))))
+	 (let ((left-val (aref tree left))
+	       (parent-val (aref tree parent)))
+	   (when (funcall comp left-val parent-val)
+	     (binheap-swap binheap left parent))))))))
 
 (defun binheap-rebalance-up (binheap from)
   (when (> from 0)
